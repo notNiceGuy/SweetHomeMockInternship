@@ -2002,12 +2002,42 @@ public class PlanComponent extends JComponent implements PlanView, Scrollable, P
     }
     return strokeWidth;
   }
-  
+
+  /**
+   * Prints the specified component plan at the scale given in the home print attributes or at a scale
+   * that makes it fill <code>pageFormat</code> imageable size if this attribute is <code>null</code>.
+   */
+
+  public int print(Graphics g, PageFormat pageFormat, int pageIndex){
+    List<Level> levels = home.getLevels();
+    List<Level> keptLevels = new ArrayList<Level>();
+    for (Level level : levels) {
+      if (level.isViewable()) {
+        keptLevels.add(level);
+      }
+    }
+
+    if (keptLevels.isEmpty()) {
+      return printSingle(g, pageFormat, pageIndex);
+    } else{
+
+      if (pageIndex >= keptLevels.size()){
+        return NO_SUCH_PAGE;
+      }
+      Level currentLevel = home.getSelectedLevel();
+      try{
+        home.setSelectedLevel(keptLevels.get(pageIndex));
+        return printSingle(g, pageFormat, 0);
+      } finally{
+        home.setSelectedLevel(currentLevel);
+      }
+    }
+  }
   /**
    * Prints this component plan at the scale given in the home print attributes or at a scale 
    * that makes it fill <code>pageFormat</code> imageable size if this attribute is <code>null</code>.
    */
-  public int print(Graphics g, PageFormat pageFormat, int pageIndex) {
+  public int printSingle(Graphics g, PageFormat pageFormat, int pageIndex) {
     List<Selectable> printedItems = getPaintedItems(); 
     Rectangle2D printedItemBounds = getItemsBounds(g, printedItems);
     if (printedItemBounds != null) {

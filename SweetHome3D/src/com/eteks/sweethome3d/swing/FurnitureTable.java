@@ -757,15 +757,15 @@ public class FurnitureTable extends JTable implements View, Printable {
       printableColumn.setIdentifier(tableColumn.getIdentifier());
       printableColumn.setHeaderValue(tableColumn.getHeaderValue());
       TableCellRenderer printableCellRenderer = new TableCellRenderer() {
-          public Component getTableCellRendererComponent(JTable table, Object value, 
+          public Component getTableCellRendererComponent(JTable table, Object value,
                                  boolean isSelected, boolean hasFocus, int row, int column) {
-            // Delegate rendering to existing cell renderer 
+            // Delegate rendering to existing cell renderer
             TableCellRenderer cellRenderer = tableColumn.getCellRenderer();
-            Component rendererComponent = cellRenderer.getTableCellRendererComponent(table, value, 
+            Component rendererComponent = cellRenderer.getTableCellRendererComponent(table, value,
                 isSelected, hasFocus, row, column);
             if (rendererComponent instanceof JCheckBox) {
               // Prefer a x sign for boolean values instead of check boxes
-              rendererComponent = defaultRenderer.getTableCellRendererComponent(table, 
+              rendererComponent = defaultRenderer.getTableCellRendererComponent(table,
                   ((JCheckBox)rendererComponent).isSelected() ? "x" : "", false, false, row, column);
             }
             rendererComponent.setBackground(Color.WHITE);
@@ -773,12 +773,55 @@ public class FurnitureTable extends JTable implements View, Printable {
             return rendererComponent;
           }
         };
-      // Change printable column cell renderer 
+      // Change printable column cell renderer
       printableColumn.setCellRenderer(printableCellRenderer);
       // Change printable column header renderer
       printableColumn.setHeaderRenderer(printableHeaderRenderer);
       printableColumnModel.addColumn(printableColumn);
-    }    
+    }
+    Enumeration<TableColumn> printableColumns = printableColumnModel.getColumns();
+    boolean hidden = true;
+    while (printableColumns.hasMoreElements()){
+      TableColumn printableColumn = printableColumns.nextElement();
+      if (printableColumn.getIdentifier().equals(HomePieceOfFurniture.SortableProperty.LEVEL)){
+        hidden = false;
+        break;
+      }
+    }
+    if (hidden){
+      TableColumn levelColumn = ((FurnitureTableColumnModel)columnModel)
+              .availableColumns.get(HomePieceOfFurniture.SortableProperty.LEVEL);
+//      printableColumnModel.addColumn(levelColumn);
+
+      // Create a printable column from existing table column
+      TableColumn printableColumn = new TableColumn();
+      printableColumn.setIdentifier(levelColumn.getIdentifier());
+      printableColumn.setHeaderValue(levelColumn.getHeaderValue());
+      TableCellRenderer printableCellRenderer = new TableCellRenderer() {
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                                                       boolean isSelected, boolean hasFocus, int row, int column) {
+          // Delegate rendering to existing cell renderer
+          TableCellRenderer cellRenderer = levelColumn.getCellRenderer();
+          Component rendererComponent = cellRenderer.getTableCellRendererComponent(table, value,
+                  isSelected, hasFocus, row, column);
+          if (rendererComponent instanceof JCheckBox) {
+            // Prefer a x sign for boolean values instead of check boxes
+            rendererComponent = defaultRenderer.getTableCellRendererComponent(table,
+                    ((JCheckBox)rendererComponent).isSelected() ? "x" : "", false, false, row, column);
+          }
+          rendererComponent.setBackground(Color.WHITE);
+          rendererComponent.setForeground(Color.BLACK);
+          return rendererComponent;
+        }
+      };
+      // Change printable column cell renderer
+      printableColumn.setCellRenderer(printableCellRenderer);
+      // Change printable column header renderer
+      printableColumn.setHeaderRenderer(printableHeaderRenderer);
+      printableColumnModel.addColumn(printableColumn);
+    }
+
+
     return print(g, pageFormat, pageIndex, printableColumnModel, Color.BLACK);
   }
 
